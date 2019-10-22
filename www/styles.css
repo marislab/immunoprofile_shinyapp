@@ -1,0 +1,56 @@
+.main-header .logo {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+body {
+  font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #666666;
+  background-color: #ffffff;
+}
+
+* { 
+  font-size: 14px;
+  line-height: 1.42857143;
+}
+
+#controls {
+  zoom: 0.80;
+}
+
+.shiny-output-error-validation {
+  color: red;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/*body {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #666666;
+  background-color: #ffffff;
+}
+
+.selectize-input { 
+  font-size: 14px; 
+  line-height: 14px;
+}
+
+.picker-input {
+  font-size: 14px;
+}
+
+.picker-dropdown {
+  font-size: 14px;
+}
+
+.actions-box {
+  font-size: 12px;
+}
+
+.selectize-dropdown { 
+  font-size: 14px; 
+  line-height: 14px; 
+}*/
