@@ -39,11 +39,11 @@ create.hm <- function(dataset, total.sub, genelist.ct, sig, hist, type){
   if(type == "mean.fpkm"){
     # pheatmap(mat = mat, annotation_col = annot, main = sig, cellwidth = 8, cellheight = 8, scale = "row", angle_col = 90)
     p <- heatmaply(x = mat, main = sig, col_side_colors = annot, plot_method = 'plotly', 
-                   scale = "row", column_text_angle = -90, k_col = nrow(annot), fontsize_row = 14, fontsize_col = 14)
+                   scale = "row", column_text_angle = -90, k_col = length(unique(annot$study_id)), fontsize_row = 14, fontsize_col = 14)
   } else {
     # pheatmap(mat = mat, annotation_col = annot, main = sig, cellwidth = 8, cellheight = 8, angle_col = 90)
     p <- heatmaply(x = mat, main = sig, col_side_colors = annot, plot_method = 'plotly',
-                   column_text_angle = -90, k_col = nrow(annot), fontsize_row = 14, fontsize_col = 14)
+                   column_text_angle = -90, k_col = length(unique(annot$study_id)), fontsize_row = 14, fontsize_col = 14)
   }
   
   # format data for display
