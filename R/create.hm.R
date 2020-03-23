@@ -53,4 +53,5 @@ create.hm <- function(dataset, total.sub, genelist.ct, sig, hist, type){
   for.heatmap <- for.heatmap[,c('signature','gene','study_id','disease','disease_name','label','mean.fpkm','mean.zscore','median.zscore','zscore.25','zscore.75','zscore.95')]
   
   newList <- list(p, for.heatmap)
+  return(newList)
 }

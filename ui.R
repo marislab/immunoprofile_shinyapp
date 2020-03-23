@@ -15,6 +15,11 @@ library(grid)
 library(heatmaply)
 library(sunburstR)
 library(d3r)
+library(crosstalk)
+library(limma)
+library(fgsea)
+library(msigdbr)
+
 options(gsubfn.engine = "R")
 options(shiny.sanitize.errors = TRUE)
 
@@ -36,9 +41,11 @@ dashboardPage(
                    sidebarMenu(
                      menuItem("Dashboard", icon = icon("dashboard"), tabName = "dashboard"),
                      menuItem("Gene Aliases", icon = icon("question-circle"), tabName = "genehelp"),
-                     menuItem("Expression Plots", icon = icon("bar-chart"), tabName = "box"),
-                     menuItem("GSVA Plots", icon = icon("bar-chart"), tabName = "gsva"),
-                     menuItem("Heatmaps", icon = icon("th"), tabName = "heatmap")
+                     menuItem("Gene-level Expression Boxplots", icon = icon("bar-chart"), tabName = "box"),
+                     menuItem("Histology-level Expression Plots", icon = icon("th"), tabName = "exprheatmap"),
+                     menuItem("Signature GSVA Plots", icon = icon("bar-chart"), tabName = "gsva"),
+                     menuItem("Signature Heatmaps", icon = icon("th"), tabName = "heatmap"),
+                     menuItem("T-effector Analysis", icon = icon("th"), tabName = "teff")
                    ) # sidebarMenu
   ), # dashboardSidebar
   
@@ -105,6 +112,22 @@ dashboardPage(
                           tabPanel("Raw Data", div(DT::dataTableOutput("heatmaptable"), style = "font-size: 12px"))
                           )
               ),
+      tabItem(tabName = "exprheatmap",
+              fluidRow(
+                box(background = "navy", width = 12,
+                    column(2, pickerInput(inputId = "exprheatmapselectInput1", label = "Dataset", choices = "none", options = list(`actions-box` = TRUE), multiple = FALSE)),
+                    column(3, pickerInput(inputId = "exprheatmapselectInput2", label = "Histology", choices = "none", options = list(`actions-box` = TRUE), multiple = FALSE)),
+                    column(3, selectInput(inputId = "exprheatmapselectInput3", label = "Signature", choices = "none")),
+                    column(2, selectInput(inputId = "exprheatmapselectInput4", label = "Type", choices = c("logFPKM"="log2fpkm", "FPKM"="fpkm", "z-score"="z.score"))), br(),
+                    column(2, actionButton(inputId = "exprheatmapsubmit1", label = "Get Heatmap", icon("paper-plane"), style = "font-size: 14px; margin-top: 6px; padding:8px;color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+                    )
+              ),
+              tabsetPanel(type = "tabs",
+                          tabPanel("Heatmap", div(style="overflow-x: scroll; overflow-y: scroll", plotlyOutput(outputId = "exprheatmap1", width = "100%", height = 1200))),
+                          tabPanel("Boxplot", div(style="overflow-x: scroll; overflow-y: scroll", plotlyOutput(outputId = "exprboxplot1", width = "100%", height = 600))),
+                          tabPanel("Raw Data", div(DT::dataTableOutput("exprheatmaptable"), style = "font-size: 12px"))
+                          )
+              ),
       tabItem(tabName = "box",
               fluidRow(
                 box(background = "navy", width = 12,
@@ -117,7 +140,25 @@ dashboardPage(
               tabsetPanel(type = "tabs",
                           tabPanel("Histology View", div(plotlyOutput("boxplot1", width = "100%", height = 600), style="overflow-x: scroll")),
                           tabPanel("Raw Data", div(DT::dataTableOutput("boxtable"), style = "font-size: 12px"))
-              ))
+              )),
+      tabItem(tabName = "teff",
+              fluidRow(
+                box(background = "navy", width = 12,
+                    column(2, selectInput(inputId = "teffselectInput1", label = "Dataset", choices = "none")),
+                    column(3, selectInput(inputId = "teffselectInput2", label = "Histology", choices = "none")),
+                    column(3, selectInput(inputId = "teffselectInput3", label = "Genesets", choices = c("Hallmark"= "H",
+                                                                                                        "Curated"="C2",
+                                                                                                        "Immunologic"="C7",
+                                                                                                        "Oncogenic"="C6",
+                                                                                                        "GO"="C5"))),
+                    column(2, actionButton(inputId = "teffsubmit1", label = "Run Analysis", icon("paper-plane"), style = "font-size: 14px; margin-top: 6px; padding:8px;color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+                )
+              ),
+              tabsetPanel(type = "tabs",
+                          tabPanel("Barplot", div(style="overflow-x: scroll; overflow-y: scroll", plotlyOutput("teffplot1", width = "100%", height = 600))),
+                          tabPanel("Differential Expression", div(DT::dataTableOutput("tefftable1"), style = "font-size: 12px")),
+                          tabPanel("Pathway Analysis", div(DT::dataTableOutput("tefftable2"), style = "font-size: 12px")))
+      )
     ) # tabItems ends
   ) # dashboardBody ends
 ) # dashboardPage ends

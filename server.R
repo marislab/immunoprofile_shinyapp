@@ -8,8 +8,12 @@ gsva.log2counts <- readRDS('data/Immunoprofiling_signatures_log2counts.RDS')
 source('R/themes.R')
 source('R/create.box.disease.R')
 source('R/create.hm.R')
+source('R/create.expr.hm.R')
 source('R/viewDataTable.R')
 source('R/create.box.gsva.R')
+source('R/dei_analysis.R')
+source('R/dei_diffexpr.R')
+source('R/dei_pathway.R')
 
 shinyServer(function(input, output, session){
   
@@ -30,11 +34,14 @@ shinyServer(function(input, output, session){
     # dataset
     updatePickerInput(session = session, inputId = "boxselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
     updatePickerInput(session = session, inputId = "heatmapselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
+    updatePickerInput(session = session, inputId = "exprheatmapselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
     updatePickerInput(session = session, inputId = "gsvaselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
+    updateSelectizeInput(session = session, inputId = "teffselectInput1", choices = studies, server = TRUE)
     
     # signatures
     updateSelectizeInput(session = session, inputId = "gsvaselectInput3", choices = sigs, server = TRUE)
     updateSelectizeInput(session = session, inputId = "heatmapselectInput3", choices = sigs, server = TRUE)
+    updateSelectizeInput(session = session, inputId = "exprheatmapselectInput3", choices = sigs, server = TRUE)
     
     # genes
     updateSelectizeInput(session = session, inputId = "boxselectInput3", choices = genes, server = TRUE)
@@ -54,12 +61,26 @@ shinyServer(function(input, output, session){
     hist <- lb[which(lb$study_id %in% selected.data),"disease"]
     updatePickerInput(session = session, inputId = "heatmapselectInput2", choices = hist, choicesOpt = list(style = rep_len("font-size: 12px;", length(hist))))
   })
+  
+  # expression heatmap
+  observe({
+    selected.data <- input$exprheatmapselectInput1
+    hist <- lb[which(lb$study_id %in% selected.data),"disease"]
+    updatePickerInput(session = session, inputId = "exprheatmapselectInput2", choices = hist, choicesOpt = list(style = rep_len("font-size: 12px;", length(hist))))
+  })
 
   # gsva boxplot  
   observe({
     selected.data <- input$gsvaselectInput1
     hist <- lb[which(lb$study_id %in% selected.data),"disease"]
     updatePickerInput(session = session, inputId = "gsvaselectInput2", choices = hist, choicesOpt = list(style = rep_len("font-size: 12px;", length(hist))))
+  })
+  
+  # teffector 
+  observe({
+    selected.data <- input$teffselectInput1
+    hist <- lb[which(lb$study_id %in% selected.data),"disease"]
+    updateSelectizeInput(session = session, inputId = "teffselectInput2", choices = hist)
   })
   
   # dashboard data summary
@@ -171,8 +192,46 @@ shinyServer(function(input, output, session){
       return()
     }
     isolate({
-      dat <- hm[[2]]
-      viewDataTable(dat = dat, pageLength = 5)
+      # dat <- hm[[2]]
+      viewDataTable(dat = hm[[2]], pageLength = 5)
+    })
+  })
+  
+  # create expression heatmap
+  output$exprheatmap1 <- renderPlotly({
+    if(input$exprheatmapsubmit1 == 0){
+      return()
+    }
+    withProgress(session = session, message = "Plotting Data...", detail = "Takes a while...", min = 1, value = 10, max = 10,{
+      isolate({
+        hist = input$exprheatmapselectInput2
+        sig = input$exprheatmapselectInput3
+        type = input$exprheatmapselectInput4
+        expr.hm <<- create.expr.hm(dataset, total.sub = total.sub, genelist.ct = genelist.ct, sig = sig, type = type, hist = hist)
+        expr.hm[[1]]
+      })
+    })
+  })
+  
+  # create expression boxplot
+  output$exprboxplot1 <- renderPlotly({
+    if(input$exprheatmapsubmit1 == 0){
+      return()
+    }
+    withProgress(session = session, message = "Plotting Data...", detail = "Takes a while...", min = 1, value = 10, max = 10,{
+      isolate({
+        expr.hm[[2]]
+      })
+    })
+  })
+  
+  # get raw data expression data
+  output$exprheatmaptable <- renderDataTable({
+    if(input$exprheatmapsubmit1 == 0){
+      return()
+    }
+    isolate({
+      viewDataTable(dat = expr.hm[[3]], pageLength = 5)
     })
   })
   
@@ -203,6 +262,48 @@ shinyServer(function(input, output, session){
     isolate({
       dat <- gsva.obj[[2]]
       viewDataTable(dat = dat, pageLength = 5)
+    })
+  })
+  
+  # teffector barplot
+  output$teffplot1 <- renderPlotly({
+    if(input$teffsubmit1 == 0){
+      return()
+    }
+    isolate({
+      study <- input$teffselectInput1
+      hist <- input$teffselectInput2
+      dei.res <<- dei(total.sub = total.sub, study = study, hist = hist)
+      dei.res[[1]]
+    })
+  })
+  
+  # teffector diffexpr
+  output$tefftable1 <- renderDataTable({
+    if(input$teffsubmit1 == 0){
+      return()
+    }
+    withProgress(session = session, message = "Generating Data...", detail = "Takes a while...", min = 1, value = 10, max = 10,{
+      isolate({
+        query <- dei.res[[2]]
+        study <- input$teffselectInput1
+        hist <- input$teffselectInput2
+        dei.degs <<- dei.diffexpr(query = query, study, hist, group1 = "Inflamed", group2 = "Desert")
+        viewDataTable(dat = dei.degs, pageLength = 5)
+      })
+    })
+  })
+  
+  output$tefftable2 <- renderDataTable({
+    if(input$teffsubmit1 == 0){
+      return()
+    }
+    withProgress(session = session, message = "Generating Data...", detail = "Takes a while...", min = 1, value = 10, max = 10,{
+      isolate({
+        geneset <- input$teffselectInput3
+        dei.pthwy <- dei.pathway(diffexpr.res = dei.degs, pathway = geneset)
+        viewDataTable(dat = dei.pthwy, pageLength = 5)
+      })
     })
   })
     

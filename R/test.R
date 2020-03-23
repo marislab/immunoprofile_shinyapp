@@ -16,7 +16,8 @@ studies <- unique(lb$study_id)
 
 # gene
 gene <- 'MYCN'
-type <- 'FPKM'
+type <- 'fpkm'
+hist <- lb$disease[1]
 
 # gsva
 meta <- x
