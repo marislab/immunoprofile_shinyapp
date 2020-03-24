@@ -26,10 +26,10 @@ options(shiny.sanitize.errors = TRUE)
 dashboardPage(
   
   # dashboardHeader begins
-  dashboardHeader(title = 'Immunoprofile Portal', titleWidth = 300, dropdownMenuOutput("messageMenu")), # dashboardHeader ends
+  dashboardHeader(title = 'Immunoprofile Portal', titleWidth = 400, dropdownMenuOutput("messageMenu")), # dashboardHeader ends
   
   # dashboardSidebar begins
-  dashboardSidebar(width = 300,
+  dashboardSidebar(width = 400,
                    
                    tags$head(
                      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
@@ -144,13 +144,13 @@ dashboardPage(
       tabItem(tabName = "teff",
               fluidRow(
                 box(background = "navy", width = 12,
-                    column(2, selectInput(inputId = "teffselectInput1", label = "Dataset", choices = "none")),
-                    column(3, selectInput(inputId = "teffselectInput2", label = "Histology", choices = "none")),
-                    column(3, selectInput(inputId = "teffselectInput3", label = "Genesets", choices = c("Hallmark"= "H",
+                    column(2, pickerInput(inputId = "teffselectInput1", label = "Dataset", choices = "none", options = list(`actions-box` = TRUE), multiple = FALSE)),
+                    column(3, pickerInput(inputId = "teffselectInput2", label = "Histology", choices = "none", options = list(`actions-box` = TRUE), multiple = FALSE)),
+                    column(2, selectInput(inputId = "teffselectInput3", label = "Genesets", choices = c("Hallmark"= "H",
                                                                                                         "Curated"="C2",
                                                                                                         "Immunologic"="C7",
                                                                                                         "Oncogenic"="C6",
-                                                                                                        "GO"="C5"))),
+                                                                                                        "GO"="C5"))), br(),
                     column(2, actionButton(inputId = "teffsubmit1", label = "Run Analysis", icon("paper-plane"), style = "font-size: 14px; margin-top: 6px; padding:8px;color: #fff; background-color: #337ab7; border-color: #2e6da4"))
                 )
               ),

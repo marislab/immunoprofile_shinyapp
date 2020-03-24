@@ -36,7 +36,7 @@ shinyServer(function(input, output, session){
     updatePickerInput(session = session, inputId = "heatmapselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
     updatePickerInput(session = session, inputId = "exprheatmapselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
     updatePickerInput(session = session, inputId = "gsvaselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
-    updateSelectizeInput(session = session, inputId = "teffselectInput1", choices = studies, server = TRUE)
+    updatePickerInput(session = session, inputId = "teffselectInput1", choices = studies, choicesOpt = list(style = rep_len("font-size: 12px;", length(studies))))
     
     # signatures
     updateSelectizeInput(session = session, inputId = "gsvaselectInput3", choices = sigs, server = TRUE)
@@ -80,7 +80,7 @@ shinyServer(function(input, output, session){
   observe({
     selected.data <- input$teffselectInput1
     hist <- lb[which(lb$study_id %in% selected.data),"disease"]
-    updateSelectizeInput(session = session, inputId = "teffselectInput2", choices = hist)
+    updatePickerInput(session = session, inputId = "teffselectInput2", choices = hist, choicesOpt = list(style = rep_len("font-size: 12px;", length(hist))))
   })
   
   # dashboard data summary
